@@ -3,15 +3,12 @@
 
 ### elf
 
-This is a function when when applied on any conventional python function , returns a formalated callable function-object , which when called ,
+This is a function when when applied on any conventional python function , returns a formulated callable function-object , which when called ,
 executes that conventional functions on specified inputs .
 
 Usage :
 
 ```python
-from pyutils import elf
-
-
 at_index = lambda l, i: l[i]
 
 
@@ -19,13 +16,14 @@ def raises(func, exception_cls=None):
     try:
         func()
     except Exception as e:
-        if exception_cls and isinstance(e, exception_cls):
+        if not exception_cls or (exception_cls and isinstance(e, exception_cls)):
             return True
     return False
 
 
 at_index_delayed: elf = elf(at_index)([1, 2], 9)
 assert raises(at_index_delayed, IndexError)
+assert raises(at_index_delayed)
 
 ```
 ## pyutils.immutables
