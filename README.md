@@ -1,5 +1,60 @@
 # pyutils
+## .
 
+### elf
+
+This is a function when when applied on any conventional python function , returns a formulated callable function-object , which when called ,
+executes that conventional functions on specified inputs .
+
+Usage :
+
+```python
+at_index = lambda l, i: l[i]
+
+
+def raises(func, exception_cls=None):
+    try:
+        func()
+    except Exception as e:
+        if not exception_cls or (exception_cls and isinstance(e, exception_cls)):
+            return True
+    return False
+
+
+at_index_delayed: elf = elf(at_index)([1, 2], 9)
+assert raises(at_index_delayed, IndexError)
+assert raises(at_index_delayed)
+
+```
+
+Idea :
+
+```python
+def sum(a: int, b: int):
+    return "{0} + {1} = {2}".format(a, b, a + b)
+
+
+inputs = (
+    (1, 2),
+    (7, 9),
+    (22, 33),
+    (10, 100),
+)
+f_code = elf(sum)
+
+f_code_register: dict = {}
+
+for i, args in enumerate(inputs):
+    f_code_register[i] = f_code(*args)
+
+print(f_code_register)
+
+print("\n`sum` on input 2:\n\t", f_code_register[2]())
+
+# we kept stored the execution information - (...code(...arguments)) in a function-object
+# and we executed it as when needed , without the need of passing arguments
+
+```
 ## pyutils.immutables
 
 ### ReadOnlyDictWrapper
