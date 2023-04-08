@@ -20,6 +20,8 @@ Drawbacks :
 Usage :
 
 ```python
+from pyutils.immutables import ReadOnlyDictWrapper
+
 d = ReadOnlyDictWrapper({"a":2,"b":[1,2]})
 ```
 
@@ -44,5 +46,7 @@ Drawbacks :
 Usage :
 
 ```python
+from pyutils.immutables import imdict
+
 d = imdict(a=2,b=[1,2])
 ```
