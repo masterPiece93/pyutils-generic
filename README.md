@@ -105,3 +105,39 @@ from pyutils.immutables import imdict
 
 d = imdict(a=2,b=[1,2])
 ```
+
+## pyutils.printing
+
+### cprint
+
+This is an alternative to python-native print function , for printing coloured outputs on console/stdout .
+
+Drawbacks :
+
+- only allows some limited (yet standars) colors .
+- converts entire output in one color ( which is obvious as it's made though ) .
+- does'nt allow bold with colors .
+- not much extra options .
+
+Usage :
+
+```python
+from pyutils.printing import cprint
+
+cprint("hello","I am Blue").blue()
+cprint("This is a heading \n\n").header()
+cprint("This is a heading \n\n").bold()
+```
+
+All color extention functions :-
+
+- `.header()`
+- `.blue()`
+- `.cyan()`
+- `.green()`
+- `.warning()`
+- `.fail()`
+- `.bold()`
+- `.underline()`
+
+
