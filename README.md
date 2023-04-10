@@ -164,4 +164,44 @@ print(sum(1,3.8)) # <- will raise ArgumentTypeError
 
 ```
 
+### TypeCheck
+
+This is a base class for defining a Schema dataclass .
+
+Usage :
+
+```python
+from pyutils.printing import cprint
+from pyutils.typecheck import TypeCheck, strict
+import dataclasses
+
+@dataclasses.dataclass(frozen=True)
+class User(TypeCheck):
+    name: str
+    age: int
+    contacts: tuple = (...,)
+
+    # Field Validators :
+    name_validator = lambda value: value.islower()
+    contacts_validator = lambda value: all([v.isdigit() and len(v) == 10 for v in value])
+    
+    # User Defined Methods :
+    def max_contacts_validation(self) -> None:
+        if len(self.contacts) > 3:
+            raise ValueError('user contact must have 10 digits')
+
+@strict
+def print_user_info(user: list):
+    validated_user = User(*user)
+    validated_user.max_contacts_validation() # a custom validation
+    cprint(f"""
+        User : {validated_user.name} ( {validated_user.age} )
+        Contacts : {",".join([f'*{a_contact}' for a_contact in validated_user.contacts])}
+        validated_user
+    """).bold()
+    
+```
+
+Field Validator : `<field_name>._validator = callable -> bool`
+
 
