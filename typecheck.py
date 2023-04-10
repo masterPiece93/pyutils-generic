@@ -1,3 +1,6 @@
+import dataclasses
+
+
 class ArgumentTypeError(TypeError):
     """Argument value Type mismatch againt function arg(*args) type-hint specification"""
     def __init__(self,fn_identifier, arg_name,arg_type,current_type) -> None:
@@ -37,5 +40,15 @@ def strict(func):
         return result
     return wrapper
   
-  class SchemaBase:
-    ...
+@dataclasses.dataclass(frozen=True)
+class User(TypeCheck):
+    name: str
+    age: int
+    contacts: tuple = (...,)
+
+    name_validator = lambda value: value.islower()
+    contacts_validator = lambda value: all([v.isdigit() and len(v) == 10 for v in value])
+
+    def max_contacts_validation(self) -> None:
+        if len(self.contacts) > 3:
+            raise ValueError('user contact must have 10 digits')
