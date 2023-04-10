@@ -140,4 +140,28 @@ All color extention functions :-
 - `.bold()`
 - `.underline()`
 
+## pyutils.typecheck
+
+### @strict
+
+This is an argument checking decorator . It's sole purpose is to check typehints in function arguments .
+
+Drawbacks :
+
+-
+
+Usage :
+
+```python
+from pyutils.typecheck import strict
+
+
+@strict
+def sum(a: int, b: int) -> int:
+    return a+b
+
+print(sum(1,3.8)) # <- will raise ArgumentTypeError
+
+```
+
 
