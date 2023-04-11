@@ -1,4 +1,5 @@
 import dataclasses
+from pyutils import __all_builtin_types__
 
 
 class ArgumentTypeError(TypeError):
@@ -52,4 +53,31 @@ class TypeCheck:
             if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
                 if not value(getattr(self, name.rstrip('_validator'))):
                     raise ValueError(f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
+
+@dataclasses.dataclass(frozen=True)
+class CoercedType:
+    class AnnotationTypeError(TypeError):...
+    class MandatoryKeyMissingError(Exception):...
+    class CoersionError(ValueError):...
+    def __post_init__(self):
+        _error_ref: str = f"CoercedType ({self.__class__.__name__})"
+        _mandatory_keys = ('value', 'coercion')
+        key1, key2 = (*_mandatory_keys,)
+
+        if not all(k in self.__annotations__ for k in _mandatory_keys):
+            raise self.MandatoryKeyMissingError(f'{_error_ref}\nmissing any of mandatory keys : {_mandatory_keys}')
+        if len(self.__annotations__) > 2:
+            raise Exception(f"{_error_ref}\nIn a coerced-type , Cannot specify annotated fields other than the mandatory ones {_mandatory_keys}")
+        if self.__annotations__[key1] not in __all_builtin_types__:
+            raise self.AnnotationTypeError(f'{_error_ref}\n`{key1}` should be annotated to any one of python-{b}')
+        if self.__annotations__[key2] is not dict:
+            raise self.AnnotationTypeError(f'{_error_ref}\n`{key2}` should be annotated as {dict}')
+        value, its_annotattion = self.__dict__[key1], self.__annotations__[key1]
+        if type(value) not in self.__dict__[key2]:
+            raise self.CoersionError(f'{_error_ref}\nInput value `{value}<{type(value)}>` cannot be coerced.')
+        coerced_value = self.__dict__[key2][type(value)](value)
+        if not isinstance(coerced_value, its_annotattion):
+            raise self.CoersionError(f'{_error_ref}\n`Input value `{value}<{type(value)}>` must coerce to annotated type -> {its_annotattion}. Instead, getting coerced to type<{type(coerced_value)}>')
+        self.__dict__[key1] = coerced_value
+    __str__ = lambda self: f"{self.value}"
 
