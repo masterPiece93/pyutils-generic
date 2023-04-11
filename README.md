@@ -246,7 +246,7 @@ def print_user_info(user: list):
     validated_user = User(*user)
     validated_user.max_contacts_validation() # a custom validation
     cprint(f"""
-        User : {validated_user.name} ( {validated_user.age} )
+        User : {validated_user.name} ( {validated_user.age.value} )
         Contacts : {",".join([f'*{a_contact}' for a_contact in validated_user.contacts])}
         validated_user
     """).bold()
