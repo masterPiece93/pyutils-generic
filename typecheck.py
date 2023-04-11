@@ -41,14 +41,15 @@ def strict(func):
     return wrapper
   
 @dataclasses.dataclass(frozen=True)
-class User(TypeCheck):
-    name: str
-    age: int
-    contacts: tuple = (...,)
+class TypeCheck:
+    def __post_init__(self):
+        for (name, field_type) in self.__annotations__.items():
+            if not isinstance(self.__dict__[name], field_type):
+                current_type = type(self.__dict__[name])
+                raise TypeError(f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
+            
+        for (name, value) in self.__class__.__dict__.items():
+            if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
+                if not value(getattr(self, name.rstrip('_validator'))):
+                    raise ValueError(f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
 
-    name_validator = lambda value: value.islower()
-    contacts_validator = lambda value: all([v.isdigit() and len(v) == 10 for v in value])
-
-    def max_contacts_validation(self) -> None:
-        if len(self.contacts) > 3:
-            raise ValueError('user contact must have 10 digits')
