@@ -47,12 +47,26 @@ class TypeCheck:
         for (name, field_type) in self.__annotations__.items():
             if not isinstance(self.__dict__[name], field_type):
                 current_type = type(self.__dict__[name])
-                raise TypeError(f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
-            
+                if not self.__class__.__dict__['type_exception']:
+                    raise TypeError(f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
+                else:
+                    if callable(self.__class__.__dict__['type_exception']):
+                        raise self.__class__.__dict__['type_exception'](name, current_type, field_type)
+                    elif type(self.__class__.__dict__['type_exception']) == type and issubclass(self.__class__.__dict__['type_exception'], Exception): # TODO : isClass check missing
+                        raise self.__class__.__dict__['type_exception'](f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
+
+        # TODO: add support for multiple validations for a particular field
         for (name, value) in self.__class__.__dict__.items():
             if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
                 if not value(getattr(self, name.rstrip('_validator'))):
-                    raise ValueError(f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
+                    parameter_name, parameter_value = name.rstrip('_validator'), getattr(self, name.rstrip('_validator'))
+                    if not self.__class__.__dict__['validator_exception']:
+                        raise ValueError(f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
+                    else:
+                        if callable(self.__class__.__dict__['validator_exception']):
+                            raise self.__class__.__dict__['validator_exception'](parameter_name, parameter_value, name)
+                        elif type(self.__class__.__dict__['validator_exception']) == type and issubclass(self.__class__.__dict__['validator_exception'], Exception): # TODO : isClass check missing
+                            raise self.__class__.__dict__['validator_exception'](f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
 
 @dataclasses.dataclass(frozen=True)
 class CoercedType:
