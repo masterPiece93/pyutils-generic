@@ -171,6 +171,9 @@ This is a base class for defining a Schema dataclass .
 Usage :
 
 ```python
+
+# A basic example of sample usage
+
 from pyutils.printing import cprint
 from pyutils.typecheck import TypeCheck, strict
 import dataclasses
@@ -200,6 +203,43 @@ def print_user_info(user: list):
         validated_user
     """).bold()
     
+```
+
+```python
+
+# An example with Custom Exceptions
+
+def type_bad_request(name, current_type, expected_type):
+    raise BadRequest(
+        custom_message=f"Invalid {name}"
+    ,   code="TYPE"
+    )
+def validation_bad_request(name, value, validation_name):
+    __code__ = "VALIDATION"
+    if validation_name == 'view_validator':
+        __code__ = 'UNSUPPORTED-VIEW'
+    raise BadRequest(
+        custom_message=f"Invalid {name}"
+    ,   code=__code__
+    )
+
+def exception_callbacks(_type: Callable=None, _validation: Callable=None): # <-- move this to better location
+    """Rigister Exception Callbacks with TypeChecking Dataclass
+    Args:
+        _type (Callable, optional): callback for TypeError. Defaults to None.
+        _validation (Callable, optional): callback for ValidationError. Defaults to None.
+    """
+    def _wrapper(cls):
+        setattr(cls, "validator_exception", _validation)
+        setattr(cls, "type_exception", _type)
+        return cls
+    return _wrapper
+@exception_callbacks(_type=type_bad_request, _validation=validation_bad_request)
+@dataclasses.dataclass(frozen=True)
+class QueryParams(TypeCheck):
+    view: str = 'month'
+    supported_views = {'month','week','week-detail'}
+    view_validator = lambda v: v.lower() in QueryParams.supported_views
 ```
 
 Field Validator : `<field_name>._validator = callable -> bool`
