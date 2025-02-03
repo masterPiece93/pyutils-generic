@@ -58,7 +58,7 @@ class TypeCheck:
         for (name, field_type) in self.__annotations__.items():
             if not isinstance(self.__dict__[name], field_type):
                 current_type = type(self.__dict__[name])
-                if not self.__class__.__dict__['type_exception']:
+                if not self.__class__.__dict__.get('type_exception'):
                     raise TypeError(f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
                 else:
                     if callable(self.__class__.__dict__['type_exception']):
@@ -71,7 +71,7 @@ class TypeCheck:
             if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
                 if not value(getattr(self, name.rstrip('_validator'))):
                     parameter_name, parameter_value = name.rstrip('_validator'), getattr(self, name.rstrip('_validator'))
-                    if not self.__class__.__dict__['validator_exception']:
+                    if not self.__class__.__dict__.get('validator_exception'):
                         raise ValueError(f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
                     else:
                         if callable(self.__class__.__dict__['validator_exception']):
