@@ -105,6 +105,8 @@ executes that conventional functions on specified inputs .
 Usage :
 
 ```python
+from pyutils import elf
+
 at_index = lambda l, i: l[i]
 
 
