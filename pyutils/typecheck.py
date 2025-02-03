@@ -1,14 +1,23 @@
+import inspect
 import dataclasses
+from typing import List
 from pyutils import __all_builtin_types__
+from abc import ABC, abstractmethod
+
+__typing_SpecialGenericAlias__ = type(List)
+__typing_GenericAlias__ = type(List[str])
 
 __all__ = [
     'ArgumentTypeError',
     'ReturnTypeError',
     'strict',
     'TypeCheck',
-    'CoercedType'
+    'CoercedType',
+    'registry',
+    'CustomType'
 ]
 
+registry : dict = {}
 
 class ArgumentTypeError(TypeError):
     """Argument value Type mismatch againt function arg(*args) type-hint specification"""
@@ -17,7 +26,7 @@ class ArgumentTypeError(TypeError):
         super().__init__()
     def __str__(self) -> str:
         return self.message
-    
+
 
 class ReturnTypeError(TypeError):
     """Return value Type mismatch againt function return(->) type-hint specification"""
@@ -51,21 +60,46 @@ def strict(func):
             raise ReturnTypeError(f"{func.__name__} ({code.co_filename})",return_type,type(result))
         return result
     return wrapper
-  
+
 @dataclasses.dataclass(frozen=True)
 class TypeCheck:
     def __post_init__(self):
-        for (name, field_type) in self.__annotations__.items():
-            if not isinstance(self.__dict__[name], field_type):
-                current_type = type(self.__dict__[name])
-                if not self.__class__.__dict__.get('type_exception'):
-                    raise TypeError(f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
-                else:
-                    if callable(self.__class__.__dict__['type_exception']):
-                        raise self.__class__.__dict__['type_exception'](name, current_type, field_type)
-                    elif type(self.__class__.__dict__['type_exception']) == type and issubclass(self.__class__.__dict__['type_exception'], Exception): # TODO : isClass check missing
-                        raise self.__class__.__dict__['type_exception'](f"Schema Violation : `{self.__class__.__name__}` Schema\nThe field `{name}` is typed as `{field_type}`, but value of type `{current_type}` is assigned .")
 
+        for (name, field_type) in self.__annotations__.items():
+
+            if inspect.isbuiltin(field_type):
+                current_type = type(self.__dict__[name])
+                _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
+                                f"\nThe field `{name}` is typed as `{field_type}`,"\
+                                f"but value of type `{current_type}` is assigned ."
+                if not isinstance(self.__dict__[name], field_type):
+                    self._type_exception_handling(
+                            name,
+                            field_type,
+                            exception_message=_message
+                        )
+            else:
+                _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
+                                f"\nThe field `{name}` is typed as `{field_type}`,"\
+                                "but the value passed doesn't conform to this." # TODO: modify this to more meaningful message 
+                if inspect.isclass(field_type) and issubclass(field_type, CustomType):
+                    if not field_type.guard(self.__dict__[name]):
+                        self._type_exception_handling(
+                            name,
+                            field_type,
+                            exception_message=_message
+                        )
+                elif isinstance(field_type, (__typing_SpecialGenericAlias__, __typing_GenericAlias__)):
+                    # TODO : support union with optional value
+                    # TODO : support Optional
+                    if not registry[field_type](self.__dict__[name]):
+                        self._type_exception_handling(
+                            name,
+                            field_type,
+                            exception_message=_message
+                        )
+                else:
+                    raise Exception(f'The {field_type} is not a supported type.')
         # TODO: add support for multiple validations for a particular field
         for (name, value) in self.__class__.__dict__.items():
             if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
@@ -78,7 +112,21 @@ class TypeCheck:
                             raise self.__class__.__dict__['validator_exception'](parameter_name, parameter_value, name)
                         elif type(self.__class__.__dict__['validator_exception']) == type and issubclass(self.__class__.__dict__['validator_exception'], Exception): # TODO : isClass check missing
                             raise self.__class__.__dict__['validator_exception'](f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
-
+    
+    def _type_exception_handling(self, name, field_type, exception_message):
+        """
+        Handles the exception raising logic
+        raises TypeError(...) if custom `type_exception` variable
+            is not specified by user .
+        """
+        current_type = type(self.__dict__[name])
+        if not self.__class__.__dict__.get('type_exception'):
+            raise TypeError(exception_message)
+        else:
+            if callable(self.__class__.__dict__['type_exception']):
+                raise self.__class__.__dict__['type_exception'](name, current_type, field_type)
+            elif type(self.__class__.__dict__['type_exception']) == type and inspect.isclass(self.__class__.__dict__['type_exception']) and issubclass(self.__class__.__dict__['type_exception'], Exception):
+                raise self.__class__.__dict__['type_exception'](exception_message)
 @dataclasses.dataclass(frozen=True)
 class CoercedType:
     class AnnotationTypeError(TypeError):...
@@ -94,7 +142,7 @@ class CoercedType:
         if len(self.__annotations__) > 2:
             raise Exception(f"{_error_ref}\nIn a coerced-type , Cannot specify annotated fields other than the mandatory ones {_mandatory_keys}")
         if self.__annotations__[key1] not in __all_builtin_types__:
-            raise self.AnnotationTypeError(f'{_error_ref}\n`{key1}` should be annotated to any one of python-{b}')
+            raise self.AnnotationTypeError(f'{_error_ref}\n`{key1}` should be annotated to any one of python-builtin type')
         if self.__annotations__[key2] is not dict:
             raise self.AnnotationTypeError(f'{_error_ref}\n`{key2}` should be annotated as {dict}')
         value, its_annotattion = self.__dict__[key1], self.__annotations__[key1]
@@ -105,4 +153,16 @@ class CoercedType:
             raise self.CoersionError(f'{_error_ref}\n`Input value `{value}<{type(value)}>` must coerce to annotated type -> {its_annotattion}. Instead, getting coerced to type<{type(coerced_value)}>')
         self.__dict__[key1] = coerced_value
     __str__ = lambda self: f"{self.value}"
+
+class CustomType(ABC):
+    """
+    helps creating a custom type
+
+    inherit this & set a static method for validating
+        any value for that type ( i.e TypeGuard )
+    """
+    @staticmethod
+    @abstractmethod
+    def guard(self, ): ...
+
 
