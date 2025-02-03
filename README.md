@@ -1,4 +1,100 @@
 # pyutils
+
+<details>  
+  <summary><b>Installation</b></summary>    
+
+### Methods of Installing Python Package directly from Git
+###### NOTE : you will be installing directly from GITHUB
+
+###### Table of Contents  
+[Installation Method 1](#method-1--with-symbolic-linking---e-)  
+
+[Installation Method 2](#method-2--direct-url)
+
+[Installation Method 3](#method-3--direct-url-with-tag-specification)
+
+
+#### Method 1 : with symbolic linking ( -e )
+
+- within requirements file :
+    ```txt
+    # requirements.txt
+    -e git+https://github.com/masterPiece93/pyutils.git#egg=pyutils
+    ```
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+- direct
+    ```sh
+    pip install -e git+https://github.com/masterPiece93/pyutils.git#egg=pyutils
+    ```
+
+output of pip-freeze command :
+```
+-e git+https://github.com/masterPiece93/pyutils.git@7c8a56f4040e578b1dc3059a9cef321bca192cf8#egg=google_drive_examples
+```
+
+this value `7c8a56f4040e578b1dc3059a9cef321bca192cf8` in the above pip-freeze output , is the latest commit hash of the repository .
+
+> Note : if you are mentioning `-e` , it is mandatory to attach `#egg=<your-pkg-name>` in the url .
+
+[Usefulness of symbolic link](#benefits-of-using-symbolic-link)
+
+
+#### Method 2 : direct url
+
+- within requirements file :
+    ```txt
+    # requirements.txt
+    git+https://github.com/masterPiece93/pyutils.git
+    ```
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+- direct
+    ```sh
+    pip install git+https://github.com/masterPiece93/pyutils.git
+    ```
+
+output of freeze command :
+```
+pyutils==1.0.0
+```
+
+
+#### Method 3 : direct url with Tag Specification
+
+- within requirements file :
+    ```txt
+    # requirements.txt
+    git+https://github.com/masterPiece93/pyutils.git@v1.0.0
+    ```
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+- direct
+    ```sh
+    pip install git+https://github.com/masterPiece93/pyutils.git@v1.0.0
+    ```
+
+output of freeze command :
+```
+pyutils==1.0.0
+```
+
+---
+</details>
+
+---
+
+## Library Usage 
+
 ## .
 
 ### elf
