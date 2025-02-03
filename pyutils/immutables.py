@@ -1,6 +1,10 @@
 import collections
 import copy
 
+__all__ = [
+    'ReadOnlyDictWrapper',
+    'imdict'
+]
 
 class ReadOnlyDictWrapper(collections.abc.Mapping):
     """Wraps a dict

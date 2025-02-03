@@ -2,6 +2,10 @@ from collections import namedtuple
 from enum import Enum
 
 
+__all__ = [
+    'cprint',
+]
+
 class Colors(str, Enum):
     HEADER = "\033[95m"
     BLUE = "\033[94m"
