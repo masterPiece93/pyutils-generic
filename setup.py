@@ -15,6 +15,7 @@ setup(
     packages = find_packages(),   # Automatically find the packages that are recognized in the '__init__.py'.
     include_package_data=True,
     package_dir={"": "."},
+    test_suite="pyutils.tests",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

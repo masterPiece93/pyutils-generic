@@ -1,11 +1,13 @@
 import inspect
 import dataclasses
-from typing import List
+from typing import List, Union, get_args
 from pyutils import __all_builtin_types__
 from abc import ABC, abstractmethod
 
 __typing_SpecialGenericAlias__ = type(List)
 __typing_GenericAlias__ = type(List[str])
+__typing_UnionGenericAlias__ = type(Union[str, int])
+# TODO : use typing.get_origin(...) method for determining the typing.* types
 
 __all__ = [
     'ArgumentTypeError',
@@ -18,6 +20,7 @@ __all__ = [
 ]
 
 registry : dict = {}
+
 
 class ArgumentTypeError(TypeError):
     """Argument value Type mismatch againt function arg(*args) type-hint specification"""
@@ -61,45 +64,15 @@ def strict(func):
         return result
     return wrapper
 
+
 @dataclasses.dataclass(frozen=True)
 class TypeCheck:
     def __post_init__(self):
 
         for (name, field_type) in self.__annotations__.items():
 
-            if inspect.isbuiltin(field_type):
-                current_type = type(self.__dict__[name])
-                _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
-                                f"\nThe field `{name}` is typed as `{field_type}`,"\
-                                f"but value of type `{current_type}` is assigned ."
-                if not isinstance(self.__dict__[name], field_type):
-                    self._type_exception_handling(
-                            name,
-                            field_type,
-                            exception_message=_message
-                        )
-            else:
-                _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
-                                f"\nThe field `{name}` is typed as `{field_type}`,"\
-                                "but the value passed doesn't conform to this." # TODO: modify this to more meaningful message 
-                if inspect.isclass(field_type) and issubclass(field_type, CustomType):
-                    if not field_type.guard(self.__dict__[name]):
-                        self._type_exception_handling(
-                            name,
-                            field_type,
-                            exception_message=_message
-                        )
-                elif isinstance(field_type, (__typing_SpecialGenericAlias__, __typing_GenericAlias__)):
-                    # TODO : support union with optional value
-                    # TODO : support Optional
-                    if not registry[field_type](self.__dict__[name]):
-                        self._type_exception_handling(
-                            name,
-                            field_type,
-                            exception_message=_message
-                        )
-                else:
-                    raise Exception(f'The {field_type} is not a supported type.')
+            self._typechecking(name, field_type)
+
         # TODO: add support for multiple validations for a particular field
         for (name, value) in self.__class__.__dict__.items():
             if name.endswith('_validator') and name.rstrip('_validator') in self.__dict__ and callable(value):
@@ -113,6 +86,64 @@ class TypeCheck:
                         elif type(self.__class__.__dict__['validator_exception']) == type and issubclass(self.__class__.__dict__['validator_exception'], Exception): # TODO : isClass check missing
                             raise self.__class__.__dict__['validator_exception'](f"Schema Validation Fail : `{self.__class__.__name__}` Schema\nThe field validation `{name}` asserts False .")
     
+    def _typechecking(self, name, field_type) -> None:
+        """Main Typechecking logic"""
+        if field_type in __all_builtin_types__:
+            # This>Block> handling builtin types like - str, list, dict ...
+            current_type = type(self.__dict__[name])
+            _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
+                            f"\nThe field `{name}` is typed as `{field_type}`,"\
+                            f"but value of type `{current_type}` is assigned ."
+            if not isinstance(self.__dict__[name], field_type):
+                self._type_exception_handling(
+                        name,
+                        field_type,
+                        exception_message=_message
+                    )
+        else:
+            _message: str = f"Schema Violation : `{self.__class__.__name__}` Schema"\
+                            f"\nThe field `{name}` is typed as `{field_type}`,"\
+                            "but the value passed doesn't conform to this." # TODO: modify this to more meaningful message 
+            if inspect.isclass(field_type) and issubclass(field_type, CustomType):
+                if not field_type.guard(self.__dict__[name]):
+                    self._type_exception_handling(
+                        name,
+                        field_type,
+                        exception_message=_message
+                    )
+            elif isinstance(field_type, __typing_UnionGenericAlias__):
+                # This>Block> handling Union types like - Union[T, ...], Optiobal[T]
+                _internal_args = get_args(field_type)
+                _last_internal_arg = _internal_args[-1]
+
+                if _last_internal_arg == type(None):
+                    # This>Block> Optional type detected
+                    if isinstance(self.__dict__[name], type(None)):
+                        ... # Do Nothing
+                    else:
+                        self._typechecking(name, _internal_args[0])
+
+                # TODO :
+                #       TODO > for a Union type , you can loop on all
+                #       TODO > `_internal_args` , resolve their types and 
+                #       TODO > do a recursive call to self._typechecking(...)
+
+
+                
+            elif isinstance(field_type, (__typing_SpecialGenericAlias__, __typing_GenericAlias__)):
+                # handling Generic types like - List, List[T], Dict[T1, T2] etc ...
+                # TODO : add support for recursive handling .
+                
+                if not registry[field_type](self.__dict__[name]):
+                    self._type_exception_handling(
+                        name,
+                        field_type,
+                        exception_message=_message
+                    )
+            
+            else:
+                raise Exception(f'The {field_type} is not a supported type.')
+
     def _type_exception_handling(self, name, field_type, exception_message):
         """
         Handles the exception raising logic
@@ -127,6 +158,8 @@ class TypeCheck:
                 raise self.__class__.__dict__['type_exception'](name, current_type, field_type)
             elif type(self.__class__.__dict__['type_exception']) == type and inspect.isclass(self.__class__.__dict__['type_exception']) and issubclass(self.__class__.__dict__['type_exception'], Exception):
                 raise self.__class__.__dict__['type_exception'](exception_message)
+
+
 @dataclasses.dataclass(frozen=True)
 class CoercedType:
     class AnnotationTypeError(TypeError):...
@@ -153,6 +186,7 @@ class CoercedType:
             raise self.CoersionError(f'{_error_ref}\n`Input value `{value}<{type(value)}>` must coerce to annotated type -> {its_annotattion}. Instead, getting coerced to type<{type(coerced_value)}>')
         self.__dict__[key1] = coerced_value
     __str__ = lambda self: f"{self.value}"
+
 
 class CustomType(ABC):
     """
