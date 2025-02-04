@@ -392,4 +392,12 @@ def print_user_info(user: list):
 print_user_info(["ankit",Age('89'),('9871241665',)])
 ```
 
+### CustomType
+
+...
+
+### Registerng `typing.*` typeguards
+
+...
+
 ---------------
