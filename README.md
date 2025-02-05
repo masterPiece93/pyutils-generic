@@ -266,7 +266,21 @@ print(sum(1,3.8)) # <- will raise ArgumentTypeError
 
 This is a base class for defining a Schema dataclass .
 
+- Defining a schema made easy with `TypeCheck` .
+- It just a simple python dataclass . your dataclass will simply inherit `TypeCheck` class to make it a schema .
+- The annotations mentioned on the dataclass will be typechecked .
+- you can even write validators for each dataclass field you have mentioned .
+
 Usage :
+
+- **How to specify Field**
+  
+  Field : `<field_name>:<type>`
+  > NOTE : it is just like a simple python `dataclass`
+
+- **How to specify Field Validator** :
+
+  Field Validator : `<field_name>._validator = callable -> bool`
 
 ```python
 
@@ -432,8 +446,8 @@ if __name__ == '__main__':
 2.
 ```python
 """
-An Advanced Approach : Decorator Pattern
-========================================
+An Advanced Approach to Custom Exception Handling: Decorator Pattern
+=====================================================================
 
 This is an elegent ( yet advanced ) approach of handling the
 custom exceptions with schema .
@@ -473,9 +487,7 @@ class QueryParams(TypeCheck):
     view_validator = lambda v: v.lower() in QueryParams.supported_views
 ```
 
-##### How to specify Field Validator :
-Field Validator : `<field_name>._validator = callable -> bool`
-
+[refer this practical flask server codebase for live usage of `TypeCheck`](#)
 
 ### CoercedType
 
