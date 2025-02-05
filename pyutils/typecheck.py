@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 __typing_SpecialGenericAlias__ = type(List)
 __typing_GenericAlias__ = type(List[str])
 __typing_UnionGenericAlias__ = type(Union[str, int])
+
 # TODO : use typing.get_origin(...) method for determining the typing.* types
 
 __all__ = [
@@ -198,5 +199,3 @@ class CustomType(ABC):
     @staticmethod
     @abstractmethod
     def guard(self, ): ...
-
-
