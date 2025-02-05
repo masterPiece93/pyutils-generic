@@ -303,9 +303,142 @@ def print_user_info(user: list):
     
 ```
 
+1.
 ```python
+"""
+Custom Exception Handling Feature
+=================================
 
-# An example with Custom Exceptions
+you can define custom exception classes of your own , which
+when specified withing the schema classes , will be automatically
+used as callbacks to transfer ( raise Exception ) details about error to you .
+
+- Feature Specifications
+  you are provided with two class variables , namely :
+    - validator_exception
+    - type_exception
+  both accept only two type of values :
+    - :Callable
+    - :Exception subclasses
+  As both of these are used as callbacks , upon being called,
+  the object/function recieves *args , which are the details of error
+
+  Callback Args
+    - validator_exception
+      - name: str | field name on which the validation was applied
+      - value: Any | the value that was passed for that field
+      - validation_name: str | name of the validation, as registered in the schema
+    - type_exception
+      - name: str | field name on which the validation was applied
+      - current_type: type | the actual type of the value that is passed
+      - expected_type: type | the type that was specified for this field on the schema
+
+- How to Use Feature
+
+  # Method 1
+  @dataclasses.dataclass(frozen=True)
+  class YourSchema(TypeCheck):
+    # Fields
+    ...
+    # Validations
+    ...
+
+    # Exception
+    validator_exception = ValidationExceptionCls
+    type_exception = TypeExceptionCls
+
+    ...
+
+  # Method 2
+  @dataclasses.dataclass(frozen=True)
+  class YourSchema(TypeCheck):
+    # Fields
+    ...
+    # Validations
+    ...
+
+    # Exception
+    validator_exception = validation_exception_callback_fn
+    type_exception = type_exception_callback_fn
+
+    ...
+"""
+
+# Demonstrating Method 1
+
+# A Custom Exception cls for Handling Validations
+class ValidationFailed(Exception):
+
+    def __init__(self, name, value, validation_name):
+        self.name = name
+        self.value = value
+        self.validation_name = validation_name
+
+    __str__ = lambda self: f"Invalid value for field - `{self.name}`"
+
+# A Custom Exception cls for Handling Type Errors
+class TypeCheckFailed(Exception):
+
+    def __init__(self, name, current_type, expected_type):
+        self.name = name
+        self.current_type = current_type
+        self.expected_type = expected_type
+
+    __str__ = lambda self: f"Invalid Type for field - `{self.name}`, expected - `{self.expected_type}`, but got - `{self.current_type}`"
+
+@dataclass(frozen=True)
+class RequestBodySchema(TypeCheck):
+
+    username: str
+    firstname: str
+    lastname: str
+    email: str
+    created_by: int
+    age : Optional[int] = None
+
+    # Constants
+    MAX_AGE = 25
+    
+    # Field Validators
+    username_validator = lambda value: value.islower()
+    firstname_validator = lastname_validator = lambda value: ' ' not in value
+    age_validator = lambda value: value < RequestBodySchema.MAX_AGE if value else True
+
+    # Exceptions
+    validator_exception = ValidationFailed
+    type_exception = TypeCheckFailed
+
+# Driver Code
+if __name__ == '__main__':
+    # Place where you'll validate your data against the schema :
+
+    try:
+        data = {
+            "username": "anki8290",
+            "firstname": "ankit",
+            "lastname": "kumar",
+            "email": "ankit8290@gmail.com",
+            "created_by": 7,
+            "age": 24
+        }
+
+        validated_data = RequestBodySchema(**data)
+    except ValidationFailed as e: # < exception cls that your registered with schema
+        print(e.name, e.value, e.validator_name) # demonstrating the values that you get on the object
+    except TypeCheckFailed as e:  # < exception cls that your registered with schema
+        print(e.name, e.current_type, e.expected_type) # demonstrating the values that you get on the object
+```
+
+2.
+```python
+"""
+An Advanced Approach : Decorator Pattern
+========================================
+
+This is an elegent ( yet advanced ) approach of handling the
+custom exceptions with schema .
+It uses a decorator based approach .
+"""
 
 def type_bad_request(name, current_type, expected_type):
     raise BadRequest(
@@ -340,6 +473,7 @@ class QueryParams(TypeCheck):
     view_validator = lambda v: v.lower() in QueryParams.supported_views
 ```
 
+##### How to specify Field Validator :
 Field Validator : `<field_name>._validator = callable -> bool`
 
 
