@@ -538,4 +538,202 @@ def print_user_info(user: list):
 print_user_info(["ankit",Age('89'),('9871241665',)])
 ```
 
+### CustomType
+
+This is an Abstract Base Class for defining a type object that can be used as typehint in a [TypeCheck](#typecheck) schema .
+
+Usage :
+
+1. 
+```python
+# =========
+# Example 1
+# =========
+import dataclasses
+from pyutils.typecheck import TypeCheck, registry, CustomType
+from typing import Any, List, Optional
+
+
+# a custom type of our own
+class IntList(CustomType):
+
+    @staticmethod
+    def guard(value: Any) -> bool:
+    """TypeGurad
+    This function will actually check if the value is a List of integers or not .
+    """
+    if isinstance(value, list) and all([isinstance(element, int) for element in value]):
+        return True
+    return False 
+
+# Schema
+@dataclasses.dataclass(frozen=True)
+class SampleSchema(TypeCheck):
+    """Sample Schema - for the testing purpose
+    """
+    data2: IntList
+    value1: Optional[IntList]
+    value2: str
+
+# demonstration 1:
+try:
+    data: dict = {
+        "data2": [1,2,3],
+        "value1": [2],
+        "value2": "2"
+    }
+    SampleSchema(**data)
+except Exception:
+    print("failed")
+else:
+    print("passed") # << this will be printed
+
+# ---
+
+# demonstration 2:
+try:
+    INCORRECT_VALUE = "3"
+    data: dict = {
+        "data2": [1,2,3],
+        "value1": [2, INCORRECT_VALUE],
+        "value2": "2"
+    }
+    SampleSchema(**data)
+except Exception:
+    print("failed") # << this will be printed
+else:
+    print("passed")
+
+# ---
+
+"""
+Explaination :
+--------------
+
+* In first demonstration ,
+"passed" will be printed on console .
+
+* In second demonstration,
+"failed" will be printed on console , because
+a string value has been added to the data , which is
+annotated as `IntList` .
+"""
+```
+
+2.
+
+```python
+# ======================================
+# Example 2 : alternate way of Example 1
+# ======================================
+import dataclasses
+from pyutils.typecheck import TypeCheck, registry, CustomType
+from typing import Any, List, Optional
+
+# a custom type of our own
+class IntList(CustomType): ...
+
+# seperately writing the guard ( this can be kept in a seperate file for re-use)
+def is_int_list(value: Any) -> bool:
+    """TypeGurad
+    This function will actually check if the value is a List of integers or not .
+    """
+    if isinstance(value, list) and all([isinstance(element, int) for element in value]):
+        return True
+    return False 
+
+if __name__ == "__main__":
+
+    # registering the guard function seperately onto the custum type
+    setattr(IntList, "guard", staticmethod(is_int_list))
+
+    # Schema
+    @dataclasses.dataclass(frozen=True)
+    class SampleSchema(TypeCheck):
+        """Sample Schema - for the testing purpose
+        """
+        data2: IntList
+        value1: Optional[IntList]
+        value2: str
+```
+
+### Registerng `typing.*` typeguards
+
+We can also register guard function for a specific  `typing.*` builtin type-hint .
+
+Usage :
+
+```python
+import dataclasses
+from pyutils.typecheck import TypeCheck, registry, CustomType
+from typing import Any, List, Optional
+
+# a typeguard function for list of strings :
+def is_str_list(value: Any) -> bool:
+    """TypeGurad
+    This function will actually check if the value is a List of strings or not .
+    """
+    if isinstance(value, list) and all([isinstance(element, str) for element in value]):
+        return True
+    return False 
+# a typeguard function for list of ints :
+def is_int_list(value: Any) -> bool:
+    """TypeGurad
+    This function will actually check if the value is a List of integers or not .
+    """
+    if isinstance(value, list) and all([isinstance(element, int) for element in value]):
+        return True
+    return False 
+
+# main
+if __name__ == "__main__":
+    registry[List[str]]=is_str_list
+    registry[List[int]]=is_int_list
+    
+    # Schema
+    @dataclasses.dataclass(frozen=True)
+    class SampleSchema(TypeCheck):
+        """Sample Schema - for the testing purpose
+        """
+        data1: List[str]
+        data2: List[int]
+        value1: Optional[List[int]]
+        value2: str
+    
+    try:
+        SampleSchema(**{
+            "data1": ["a", "n", 1],
+            "data2": [1, 2, 3],
+            "value1": [1, 2, 3],
+            "value2": "ankit"
+        })
+    except Exception as e:
+        print(f"""
+        Exception From Demonstration 1:
+        {e}
+        """)
+    
+```
+
 ---------------
+
+## Local Development
+
+Executing Tests :
+```shell
+python3 setup.py test
+
+# it will execute all the tests listed in `pyutils.tests/` folder 
+```
+
+Creating a Build :
+```shell
+python3 setup.py bdist_wheel
+
+```
+
+Checking the correctness of a Build :
+```shell
+check-wheel-contents <path-to-dist-folder>
+
+```
