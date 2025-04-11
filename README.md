@@ -401,3 +401,24 @@ print_user_info(["ankit",Age('89'),('9871241665',)])
 ...
 
 ---------------
+
+## Local Development
+
+Executing Tests :
+```shell
+python3 setup.py test
+
+# it will execute all the tests listed in `pyutils.tests/` folder 
+```
+
+Creating a Build :
+```shell
+python3 setup.py bdist_wheel
+
+```
+
+Checking the correctness of a Build :
+```shell
+check-wheel-contents <path-to-dist-folder>
+
+```
