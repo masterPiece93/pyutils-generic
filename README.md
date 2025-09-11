@@ -88,6 +88,29 @@ output of freeze command :
 pyutils==1.0.0
 ```
 
+NOTE : since this is a private repo , you need a use PAT for external usages .
+
+##### Install in a Docker Container :
+
+- Add following in your Dockerfile : 
+
+  ```Dockerfile
+  # Install git
+  RUN apt-get update && \
+      apt-get install -y git
+  
+  # secret retreival
+  RUN --mount=type=secret,id=api_key,target=/run/secrets/api_key_file \
+     API_KEY=$(cat /run/secrets/api_key_file) && \
+     pip install --no-cache-dir git+https://xavient:$API_KEY@github.com/xavient/django-gauth.git 
+  ```
+
+- Build docker command :
+  ```sh
+  # mounting build time secert
+  DOCKER_BUILDKIT=1 docker build --secret id=api_key,src=./PAT.txt -t datti:latest .
+  ```
+
 ---
 </details>
 
