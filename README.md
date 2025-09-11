@@ -102,7 +102,7 @@ we use Docker's `mount secrets` for this purpose
   # secret retreival
   RUN --mount=type=secret,id=api_key,target=/run/secrets/api_key_file \
      API_KEY=$(cat /run/secrets/api_key_file) && \
-     pip install --no-cache-dir git+https://xavient:$API_KEY@github.com/xavient/django-gauth.git 
+     pip install --no-cache-dir git+https://masterPiece93:$API_KEY@github.com/masterPiece93/pyutils.git 
   ```
 
 - Build docker command :
