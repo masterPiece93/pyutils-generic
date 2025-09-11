@@ -91,7 +91,7 @@ pyutils==1.0.0
 NOTE : since this is a private repo , you need a use PAT for external usages .
 
 ##### Install in a Docker Container :
-
+we use Docker's `mount secrets` for this purpose 
 - Add following in your Dockerfile : 
 
   ```Dockerfile
