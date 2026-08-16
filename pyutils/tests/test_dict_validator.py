@@ -3,7 +3,7 @@ Unit tests for `schema.py`.
 
 Covers:
     * ValidatorMeta metaclass rules (abstract `validate`, read-only class vars)
-    * DictValidator._check_specification for every validation branch
+    * JsonDictValidator._check_specification for every validation branch
     * Required / optional keys, defaults, type checks
     * Nested dict and nested list-of-dicts constraints
     * Extra key handling (allowed / not allowed)
@@ -16,20 +16,20 @@ Run with the project virtual environment:
 import unittest
 from typing import ClassVar
 
-from pyutils.schema import DictValidator, ValidatorMeta
+from pyutils.schema import JsonDictValidator, ValidatorMeta
 
 
 def make_validator(spec, allow_extra=False, formatters=None):
-    """Helper to build a concrete DictValidator subclass on the fly."""
+    """Helper to build a concrete JsonDictValidator subclass on the fly."""
     namespace = {
         "VALIDATION_SPECIFICATION": spec,
         "ALLOWED_EXTRA_KEYS": allow_extra,
         "FORMATTERS": formatters or {},
-        "validate": lambda self, json_payload: DictValidator.validate(
+        "validate": lambda self, json_payload: JsonDictValidator.validate(
             self, json_payload, logger=lambda m, level: None, message_wrapper=lambda m: m
         ),
     }
-    cls = ValidatorMeta("TmpValidator", (DictValidator,), namespace)
+    cls = ValidatorMeta("TmpValidator", (JsonDictValidator,), namespace)
     return cls
 
 
@@ -74,17 +74,17 @@ class TestLoggingBranches(unittest.TestCase):
     """Tests exercising the print-based logging fallback."""
 
     def test_validate_without_logger_uses_print(self):
-        Validator = ValidatorMeta("PrintValidator", (DictValidator,), {
+        Validator = ValidatorMeta("PrintValidator", (JsonDictValidator,), {
             "VALIDATION_SPECIFICATION": {"name": (True, str, None)},
             "ALLOWED_EXTRA_KEYS": False,
             "FORMATTERS": {},
-            "validate": lambda self, json_payload: DictValidator.validate(self, json_payload),
+            "validate": lambda self, json_payload: JsonDictValidator.validate(self, json_payload),
         })
         import io
         from contextlib import redirect_stdout
         buffer = io.StringIO()
         with redirect_stdout(buffer):
-            with self.assertRaises(DictValidator.SchemaViolation):
+            with self.assertRaises(JsonDictValidator.SchemaViolation):
                 Validator().validate({"name": 123})
         self.assertIn("ERROR", buffer.getvalue())
 
@@ -103,19 +103,19 @@ class TestBasicValidation(unittest.TestCase):
         self.Validator().validate(payload)
 
     def test_non_dict_payload_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate(["not", "a", "dict"])
 
     def test_empty_payload_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({})
 
     def test_missing_required_key_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"name": "alice"})
 
     def test_wrong_type_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"name": "alice", "age": "thirty"})
 
 
@@ -146,7 +146,7 @@ class TestExtraKeys(unittest.TestCase):
 
     def test_extra_key_not_allowed_raises(self):
         Validator = make_validator({"name": (True, str, None)}, allow_extra=False)
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             Validator().validate({"name": "alice", "extra": "boom"})
 
     def test_extra_key_allowed_passes(self):
@@ -173,15 +173,15 @@ class TestNestedDict(unittest.TestCase):
         self.assertEqual(payload["meta"]["label"], "default_label")
 
     def test_empty_nested_dict_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"meta": {}})
 
     def test_nested_required_key_missing_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"meta": {"label": "x"}})
 
     def test_nested_wrong_type_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"meta": {"count": "five"}})
 
 
@@ -206,15 +206,15 @@ class TestNestedListOfDicts(unittest.TestCase):
         self.assertEqual(payload["users"][0]["email"], "")
 
     def test_list_item_not_dict_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"users": ["not_a_dict"]})
 
     def test_list_item_missing_required_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"users": [{"first_name": "ann"}]})
 
     def test_list_item_wrong_type_raises(self):
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             self.Validator().validate({"users": [{"first_name": "ann", "age": "old"}]})
 
 
@@ -235,7 +235,7 @@ class TestIngestionMessageExample(unittest.TestCase):
     """End-to-end test mirroring the documented example."""
 
     def _build_message_class(self):
-        class IngestionMessage(DictValidator):
+        class IngestionMessage(JsonDictValidator):
             VALIDATION_SPECIFICATION: ClassVar[dict] = {
                 "eventId": (True, str, None),
                 "username": (True, str, None),
@@ -294,14 +294,14 @@ class TestIngestionMessageExample(unittest.TestCase):
         IngestionMessage = self._build_message_class()
         data = self._valid_payload()
         data["channel"] = "extra"
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             IngestionMessage().validate(data, "187129034567124876")
 
     def test_missing_required_top_level_key_raises(self):
         IngestionMessage = self._build_message_class()
         data = self._valid_payload()
         del data["eventId"]
-        with self.assertRaises(DictValidator.SchemaViolation):
+        with self.assertRaises(JsonDictValidator.SchemaViolation):
             IngestionMessage().validate(data, "187129034567124876")
 
 

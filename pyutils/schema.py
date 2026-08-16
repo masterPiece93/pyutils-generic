@@ -8,15 +8,15 @@ This script shows an exerpt from a part of
 process , where a incoming pub/sub message
 is validated against a predefined schema.
 
-* Class:DictValidator - is developed as a reusable
+* Class:JsonDictValidator - is developed as a reusable
   validator meta class for validating a python dict 
   against a schema .
   The schema can be defined declaratively in a sub class 
-  that uses DictValidator as a metaclass .
+  that uses JsonDictValidator as a metaclass .
   
 * Class:IngestionMessage - is the class that defines
   the schema for a pub/sub message dict . It uses
-  `class:DictValidator` as a metaclass for being able
+  `class:JsonDictValidator` as a metaclass for being able
   to define a schema .
 
 """
@@ -54,7 +54,7 @@ class ValidatorMeta(type):
         super().__setattr__(name, value)
 
 
-class DictValidator(metaclass=ValidatorMeta):
+class JsonDictValidator(metaclass=ValidatorMeta):
     """
     Validates the provided dict paylod against
         the provided validation specification
