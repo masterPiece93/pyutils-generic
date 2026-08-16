@@ -390,7 +390,7 @@ used as callbacks to transfer ( raise Exception ) details about error to you .
   @dataclasses.dataclass(frozen=True)
   class YourSchema(TypeCheck):
     # Fields
-    ...
+    ...ReadOnlyMeta
     # Validations
     ...
 
@@ -738,6 +738,106 @@ if __name__ == "__main__":
     
 ```
 
+## pyutils.schema
+
+### JsonDictValidator
+
+This is a simple schema defination and validation helper , that aims to be readable and very intutive . It's sole purpose is to check a json type data payload .
+
+Drawbacks :
+
+- it get's slower as the schema gets more nested and data to be validated becomes huge
+
+Pros :
+
+- the schema defined using this are very simple and basic ( for basic situations ) and very intutive so that all the expectations from the data to be validated are in a same structural format as the data itself would .
+
+Usage :
+
+```python
+from pyutils.schema import JsonDictValidator
+
+
+# ===============
+# main entrypoint
+# ===============
+# * demonstrates the usage of JsonDictValidator with IngestionMessage classes as an example
+if __name__ == '__main__':
+
+    # Defining a concrete implementation of JsonDictValidator for Ingestion Messages
+    class IngestionMessage(JsonDictValidator):
+        """A Simple Dict Validator for 
+        Ingestion Message Json Payload
+        """
+        VALIDATION_SPECIFICATION: ClassVar[dict] = {    # Required
+            # KEY       ( Req, type, default )
+            "eventId":  (True, str, None),
+            "username": (True, str, None),
+            "url":      (True, str, None),
+            "orgId":    (True, str, None),
+            "tenancy":  (True, str, None),
+            "orgName":  (True, dict, None, {
+                "max_length":   (False, int, 100),
+                "min_length":   (False, int, 0),
+                "pattern":      (False, str, r"^[a-zA-Z0-9_]+$")
+            }),
+            "user":    (True, list, None, [{
+                "first_name":   (True, str, None),
+                "age":          (True, int, None),
+                "email":        (False, str, ''),
+            }]),
+        }
+        ALLOWED_EXTRA_KEYS: ClassVar[bool] = False      # Optional
+        FORMATTERS: ClassVar[dict] = {                  # Optional
+            "url": lambda value: value.lstrip("/"),
+        }
+
+        def validate(self, json_payload: dict, message_id: str) -> None:
+            """Validate Ingestion Message"""
+            # logging handler
+            _logger = lambda msg, level: log.log(get_numeric_level(level), msg)
+            # message formulation
+            _message_wrapper = lambda log_msg: msg(log_msg, pubsub_message_id=message_id)
+            # using default schema validation
+            super().validate(json_payload, logger=_logger, message_wrapper=_message_wrapper)
+
+    # Testing the IngestionMessage Validator
+    try:
+        IngestionMessage.ALLOWED_EXTRA_KEYS=True
+    except AttributeError as e:
+        assert str(e) == "Cannot modify constant 'ALLOWED_EXTRA_KEYS' on ReadOnly Class IngestionMessage"
+    
+    # Sample Payload for Testing
+    data: dict = {
+            "eventId":  '(True, str, None)',
+            "username": '(True, str, None)',
+            "url":      '/(True, str, None)/',
+            "orgId":    '(True, str, None)',
+            "tenancy":  '(True, str, None)',
+            "orgName":  {
+                "max_length": 100,
+            },
+            "user":    [
+                {
+                    "first_name":   'ankit',
+                    "age":          33,
+                },
+                {
+                    "first_name":   'john_doe',
+                    "age":          28,
+                    "email":        'john@example.com',
+                }
+            ],
+            # "channel":  '(True, str, None)',
+            # "extra":    '(True, str, None)',
+        }
+
+    # Validating the Sample Payload
+    IngestionMessage().validate(
+        data, '187129034567124876'
+    )
+    print(data) # Prints the validated and formatted data
+```
 ---------------
 
 ## Local Development
