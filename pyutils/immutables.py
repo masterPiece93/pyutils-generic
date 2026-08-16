@@ -3,7 +3,8 @@ import copy
 
 __all__ = [
     'ReadOnlyDictWrapper',
-    'imdict'
+    'imdict',
+    'ReadOnlyMeta'
 ]
 
 class ReadOnlyDictWrapper(collections.abc.Mapping):
@@ -47,3 +48,20 @@ class imdict(dict):
     setdefault = _immutable
     pop = _immutable
     popitem = _immutable
+
+
+class ReadOnlyMeta:
+    """
+    Abstract Base for ReadOnly Classes
+
+    Prohibits the modification of class
+        varibales .
+    
+    Usage:
+        class Xyz(metaclass=ReadOnlyMeta):
+            ...
+    """
+    def __setattr__(cls, name, value):
+        if name in cls.__dict__:
+            raise AttributeError(f"Cannot modify constant '{name}' on ReadOnly Class {cls.__qualname__}")
+        super().__setattr__(name, value)
