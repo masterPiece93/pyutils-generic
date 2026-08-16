@@ -760,3 +760,22 @@ Checking the correctness of a Build :
 check-wheel-contents <path-to-dist-folder>
 
 ```
+
+Coverage :
+
+```bash
+# single test
+python3 -m coverage run -m unittest -v pyutils.tests.test_dict_validator
+```
+```bash
+# all tests
+python3 -m coverage run -m unittest discover -s pyutils/tests -p 'test_*.py'
+```
+```bash
+# coverage report
+python3 -m coverage report -m
+```
+```bash
+# browsable HTML report
+python3 -m coverage html   # -> htmlcov/index.html
+```
