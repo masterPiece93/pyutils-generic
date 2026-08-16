@@ -113,36 +113,35 @@ class Json(CustomType):
 
         if not isinstance(value, dict):
             return False
-        
-        # recursive check for the value
-        def is_valid(key: str, value: Any) -> bool:
-            
-            # key check
-            if not isinstance(key, str):
-                return False
-            # value check ( nestedly)
+
+        # recursive check for a single JSON value
+        def is_valid_value(value: Any) -> bool:
+            # scalar (leaf) values are always valid
             if isinstance(value, (str, int, float, bool)):
                 return True
+            # a list may only contain scalars or dicts (no nested lists)
             elif isinstance(value, list):
-                for item in value:
-                    if isinstance(item, (str, int, float, bool)):
-                        return True
-                    elif isinstance(item, dict):
-                        for k, v in item.items():
-                            return is_valid(k, v)
-                    else:
-                        return False
+                return all(
+                    isinstance(item, (str, int, float, bool, dict))
+                    and is_valid_value(item)
+                    for item in value
+                )
+            # every key must be a str and every value a valid JSON value
             elif isinstance(value, dict):
-                for k, v in value.items():
-                    return is_valid(k, v)
+                return all(
+                    isinstance(k, str) and is_valid_value(v)
+                    for k, v in value.items()
+                )
+            # anything else (e.g. a nested list, set, object) is invalid
             else:
                 return False
 
-        # check for the value
-        for key, val in value.items():
-            return is_valid(key, val)
-        
-        return True
+        # a top-level dict is valid when all keys are str and all values valid
+        return all(
+            isinstance(key, str) and is_valid_value(val)
+            for key, val in value.items()
+        )
+
 
 
 class CummulativeTestCase(unittest.TestCase):
