@@ -4,18 +4,49 @@ from enum import Enum
 
 __all__ = [
     'cprint',
+    'Colors'
 ]
 
 class Colors(str, Enum):
+    """Enumeration of text colors for terminal output."""
     HEADER = "\033[95m"
     BLUE = "\033[94m"
     CYAN = "\033[96m"
     GREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
+    WARNING = PALE = "\033[93m"
+    FAIL = RED = "\033[91m"
+    ENDC = RESET = "\033[0m"
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
+    ITALIC = "\033[3m"
+    ORANGE = "\033[38;5;208m"
+    PURPLE = "\033[38;5;129m"
+
+    def colorize(self, text: str,) -> str:
+        """
+        Colorize the given text with the color represented by this enum member.
+
+        >>> Colors.GREEN.colorize("This text will be green")
+        This text will be green
+
+        >>> Colors.FAIL.colorize("This text will be red")
+        This text will be red
+
+        >>> Colors.GREEN.colorize(Colors.BOLD.colorize("This text will be bold and green"))
+        This text will be bold and green
+        """
+        return f"{self.value}{text}{Colors.ENDC.value}"
+
+    @classmethod
+    def register(cls, name: str, color_code: str):
+        """
+        Register a new color or style with the given name and color code.
+
+        >>> Colors.register("MAGENTA", "\033[35m")
+        >>> Colors.MAGENTA.colorize("This text will be magenta")
+        This text will be magenta
+        """
+        setattr(cls, name, color_code)
 
 
 def cprint(*args, **kwargs):
