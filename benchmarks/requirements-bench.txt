@@ -1,0 +1,7 @@
+# Benchmark harness libraries (measurement / plotting only, no validators).
+# Install with:
+#   ./.venv/bin/pip install -r benchmarks/requirements-bench.txt
+pyperf>=2.6
+perfplot>=0.10
+matplotlib>=3.7
+numpy>=1.24
