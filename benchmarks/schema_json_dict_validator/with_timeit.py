@@ -3,7 +3,7 @@ Benchmarking
 ============
 """
 import timeit
-from pyutils.schema import JsonDictValidator
+from pyutils_generic.schema import JsonDictValidator
 
 from typing import Optional, ClassVar
 

@@ -16,7 +16,7 @@ Run with the project virtual environment:
 import unittest
 from typing import ClassVar
 
-from pyutils.schema import JsonDictValidator, ValidatorMeta
+from pyutils_generic.schema import JsonDictValidator, ValidatorMeta
 
 
 def make_validator(spec, allow_extra=False, formatters=None):

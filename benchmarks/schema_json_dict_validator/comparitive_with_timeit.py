@@ -5,7 +5,7 @@ Comparative Benchmarking
 import subprocess
 import sys
 import timeit
-from pyutils.schema import JsonDictValidator
+from pyutils_generic.schema import JsonDictValidator
 
 SAMPLE_JSON_PAYLOAD = {
     "eventId": "123",

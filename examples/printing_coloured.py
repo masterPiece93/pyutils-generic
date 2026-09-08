@@ -3,7 +3,7 @@ Example usage of the cprint function with colored output.
 """
 
 
-from pyutils.colored import cprint, Palette
+from pyutils_generic.colored import cprint, Palette
 from typing import NamedTuple
 
 # classic usage of cprint

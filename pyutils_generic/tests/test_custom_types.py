@@ -1,7 +1,7 @@
 import unittest
 import dataclasses
 import datetime
-from pyutils.typecheck import TypeCheck, registry, CustomType
+from pyutils_generic.typecheck import TypeCheck, registry, CustomType
 from typing import Any, List, Optional
 
 

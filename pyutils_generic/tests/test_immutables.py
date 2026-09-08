@@ -8,7 +8,7 @@ Covers:
 """
 import unittest
 
-from pyutils.immutables import ReadOnlyMeta, ReadOnlyDictWrapper, imdict
+from pyutils_generic.immutables import ReadOnlyMeta, ReadOnlyDictWrapper, imdict
 
 
 class TestReadOnlyMeta(unittest.TestCase):

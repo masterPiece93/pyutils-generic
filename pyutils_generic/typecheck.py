@@ -1,7 +1,7 @@
 import inspect
 import dataclasses
 from typing import List, Union, get_args
-from pyutils import __all_builtin_types__
+from pyutils_generic import __all_builtin_types__
 from abc import ABC, abstractmethod
 
 __typing_SpecialGenericAlias__ = type(List)

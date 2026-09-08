@@ -11,7 +11,7 @@ Covers:
 import dataclasses
 import unittest
 
-from pyutils.typecheck import (
+from pyutils_generic.typecheck import (
     strict,
     TypeCheck,
     CoercedType,

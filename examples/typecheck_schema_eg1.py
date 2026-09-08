@@ -11,7 +11,7 @@ What to demonstrate ?
 """
 
 from dataclasses import dataclass
-from pyutils.typecheck import TypeCheck
+from pyutils_generic.typecheck import TypeCheck
 from typing import Any, List, Optional
 from enum import Enum
 

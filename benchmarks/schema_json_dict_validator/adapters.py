@@ -19,7 +19,7 @@ import msgspec
 from cerberus import Validator as _CerberusValidator
 from pydantic import BaseModel
 
-from pyutils.schema import JsonDictValidator, ValidatorMeta
+from pyutils_generic.schema import JsonDictValidator, ValidatorMeta
 
 
 # ---------------------------------------------------------------------------
