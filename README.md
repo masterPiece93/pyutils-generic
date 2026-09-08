@@ -227,7 +227,7 @@ from pyutils.immutables import imdict
 d = imdict(a=2,b=[1,2])
 ```
 
-## pyutils.printing
+## pyutils.colored
 
 ### cprint
 
@@ -242,24 +242,20 @@ Drawbacks :
 
 Usage :
 
+- [Refer : examples](./examples/printing_coloured.py)
+
 ```python
+"""
+Sample Usage
+"""
 from pyutils.printing import cprint
 
-cprint("hello","I am Blue").blue()
-cprint("This is a heading \n\n").header()
-cprint("This is a heading \n\n").bold()
+cprint("This is a blue message.").style(Palette.BLUE)
+cprint("Hello, World!").style(B=True)
+cprint("This is a heading \n\n").style(B=True, U=True)
 ```
 
-All color extention functions :-
-
-- `.header()`
-- `.blue()`
-- `.cyan()`
-- `.green()`
-- `.warning()`
-- `.fail()`
-- `.bold()`
-- `.underline()`
+- [Refer : docs :: colored](./docs/colored.md)
 
 ## pyutils.typecheck
 

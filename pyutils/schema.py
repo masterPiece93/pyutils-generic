@@ -64,10 +64,11 @@ class JsonDictValidator(metaclass=ValidatorMeta):
     class SchemaViolation(Exception):
         """Indicates the violation of validation specification"""
 
-    SCHEMA_VIOLATION_EXCEPTION: ClassVar[Exception] = SchemaViolation
+    SCHEMA_VIOLATION_EXCEPTION: ClassVar[type[Exception]] = SchemaViolation
     ALLOWED_EXTRA_KEYS: ClassVar[bool] = False
     FORMATTERS: ClassVar[dict] = {}
-
+    VALIDATION_SPECIFICATION: ClassVar[dict] = {}
+    
     @abstractmethod
     def validate(self, json_payload: dict, logger: Optional[Callable] = None, message_wrapper: Optional[Callable] = None) -> Optional[Exception]:
         """
