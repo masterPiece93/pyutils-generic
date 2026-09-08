@@ -1,6 +1,6 @@
 # Benchmarks
 
-Performance benchmarks for `pyutils` modules, comparing them against popular
+Performance benchmarks for `pyutils_generic` modules, comparing them against popular
 peer libraries.
 
 ## Layout
@@ -40,7 +40,7 @@ You can install just one set if you only need part of the pipeline:
 
 ## `schema_json_dict_validator`
 
-Benchmarks `pyutils.schema.JsonDictValidator` against six peers on three
+Benchmarks `pyutils_generic.schema.JsonDictValidator` against six peers on three
 payload shapes:
 
 - **flat** — dict of `n` string fields

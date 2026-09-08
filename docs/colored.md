@@ -64,12 +64,14 @@ Then import from it:
 from your_project.utils.colored import cprint, Palette, Effects, Styleit
 ```
 
-### Option 2 — Keep it at the project root
+### Option 2 — Install `pyutils_generic` (recommended)
 
-If your entry scripts live at the repo root, you can import directly:
+If you've installed the `pyutils_generic` package (see the main
+[README](../README.md#installation) for install instructions), import
+`colored` as a submodule of it:
 
 ```python
-from colored import cprint, Palette, Effects
+from pyutils_generic.colored import cprint, Palette, Effects
 ```
 
 ### Option 3 — Add its folder to `sys.path`
@@ -88,7 +90,7 @@ from colored import cprint, Palette
 For day-to-day use you usually only need three names:
 
 ```python
-from colored import cprint, Palette, Effects
+from pyutils_generic.colored import cprint, Palette, Effects
 ```
 
 Add `Styleit` if you prefer the `style >> text` operator form.
@@ -118,7 +120,7 @@ The reset sequence `\033[0m` is available as `Palette.ENDC` and `Palette.RESET`.
 ## Quick start
 
 ```python
-from colored import cprint, Palette, Effects, Styleit
+from pyutils_generic.colored import cprint, Palette, Effects, Styleit
 
 # 1) Wrap a string with a color
 print(Palette.GREEN.colorize("success"))
@@ -295,7 +297,7 @@ the result to a variable.
 ### A tiny logging helper
 
 ```python
-from colored import cprint, Palette
+from pyutils_generic.colored import cprint, Palette
 
 def info(msg):    cprint(f"[INFO]  {msg}").style(color=Palette.BLUE)
 def ok(msg):      cprint(f"[OK]    {msg}").style(color=Palette.GREEN, B=True)
@@ -312,13 +314,13 @@ error("could not connect")
 
 ```python
 # brand.py
-from colored import Palette
+from pyutils_generic.colored import Palette
 
 Palette.register("BRAND_PRIMARY",  "\033[38;2;16;185;129m")   # teal
 Palette.register("BRAND_ACCENT",   "\033[38;2;245;158;11m")   # amber
 
 # elsewhere
-from colored import cprint
+from pyutils_generic.colored import cprint
 import brand  # ensures colors are registered
 
 cprint("Brand!").style(color="BRAND_PRIMARY", B=True)
@@ -327,7 +329,7 @@ cprint("Brand!").style(color="BRAND_PRIMARY", B=True)
 ### Build styled strings for f-strings / logging
 
 ```python
-from colored import Palette, Styleit
+from pyutils_generic.colored import Palette, Styleit
 
 label = Styleit(Palette.GREEN, B=True) >> "PASS"
 print(f"Test result: {label}")
@@ -336,7 +338,7 @@ print(f"Test result: {label}")
 ### Reset a nested section manually
 
 ```python
-from colored import Palette
+from pyutils_generic.colored import Palette
 
 parts = [
     Palette.RED.value, "error",

@@ -1,4 +1,4 @@
-# pyutils
+# pyutils_generic
 
 <details>  
   <summary><b>Installation</b></summary>    
@@ -19,7 +19,7 @@
 - within requirements file :
     ```txt
     # requirements.txt
-    -e git+https://github.com/masterPiece93/pyutils.git#egg=pyutils
+    -e git+https://github.com/masterPiece93/pyutils_generic.git#egg=pyutils_generic
     ```
 
     ```sh
@@ -28,12 +28,12 @@
 
 - direct
     ```sh
-    pip install -e git+https://github.com/masterPiece93/pyutils.git#egg=pyutils
+    pip install -e git+https://github.com/masterPiece93/pyutils_generic.git#egg=pyutils_generic
     ```
 
 output of pip-freeze command :
 ```
--e git+https://github.com/masterPiece93/pyutils.git@7c8a56f4040e578b1dc3059a9cef321bca192cf8#egg=google_drive_examples
+-e git+https://github.com/masterPiece93/pyutils_generic.git@7c8a56f4040e578b1dc3059a9cef321bca192cf8#egg=google_drive_examples
 ```
 
 this value `7c8a56f4040e578b1dc3059a9cef321bca192cf8` in the above pip-freeze output , is the latest commit hash of the repository .
@@ -48,7 +48,7 @@ this value `7c8a56f4040e578b1dc3059a9cef321bca192cf8` in the above pip-freeze ou
 - within requirements file :
     ```txt
     # requirements.txt
-    git+https://github.com/masterPiece93/pyutils.git
+    git+https://github.com/masterPiece93/pyutils_generic.git
     ```
 
     ```sh
@@ -57,12 +57,12 @@ this value `7c8a56f4040e578b1dc3059a9cef321bca192cf8` in the above pip-freeze ou
 
 - direct
     ```sh
-    pip install git+https://github.com/masterPiece93/pyutils.git
+    pip install git+https://github.com/masterPiece93/pyutils_generic.git
     ```
 
 output of freeze command :
 ```
-pyutils==1.0.0
+pyutils_generic==1.0.0
 ```
 
 
@@ -71,7 +71,7 @@ pyutils==1.0.0
 - within requirements file :
     ```txt
     # requirements.txt
-    git+https://github.com/masterPiece93/pyutils.git@v1.0.0
+    git+https://github.com/masterPiece93/pyutils_generic.git@v1.0.0
     ```
 
     ```sh
@@ -80,12 +80,12 @@ pyutils==1.0.0
 
 - direct
     ```sh
-    pip install git+https://github.com/masterPiece93/pyutils.git@v1.0.0
+    pip install git+https://github.com/masterPiece93/pyutils_generic.git@v1.0.0
     ```
 
 output of freeze command :
 ```
-pyutils==1.0.0
+pyutils_generic==1.0.0
 ```
 
 NOTE : since this is a private repo , you need a use PAT for external usages .
@@ -102,7 +102,7 @@ we use Docker's `mount secrets` for this purpose
   # secret retreival
   RUN --mount=type=secret,id=api_key,target=/run/secrets/api_key_file \
      API_KEY=$(cat /run/secrets/api_key_file) && \
-     pip install --no-cache-dir git+https://masterPiece93:$API_KEY@github.com/masterPiece93/pyutils.git 
+     pip install --no-cache-dir git+https://masterPiece93:$API_KEY@github.com/masterPiece93/pyutils_generic.git 
   ```
 
 - Build docker command :
@@ -128,7 +128,7 @@ executes that conventional functions on specified inputs .
 Usage :
 
 ```python
-from pyutils import elf
+from pyutils_generic import elf
 
 at_index = lambda l, i: l[i]
 
@@ -176,7 +176,7 @@ print("\n`sum` on input 2:\n\t", f_code_register[2]())
 # and we executed it as when needed , without the need of passing arguments
 
 ```
-## pyutils.immutables
+## pyutils_generic.immutables
 
 ### ReadOnlyDictWrapper
 
@@ -196,7 +196,7 @@ Drawbacks :
 Usage :
 
 ```python
-from pyutils.immutables import ReadOnlyDictWrapper
+from pyutils_generic.immutables import ReadOnlyDictWrapper
 
 d = ReadOnlyDictWrapper({"a":2,"b":[1,2]})
 ```
@@ -222,12 +222,12 @@ Drawbacks :
 Usage :
 
 ```python
-from pyutils.immutables import imdict
+from pyutils_generic.immutables import imdict
 
 d = imdict(a=2,b=[1,2])
 ```
 
-## pyutils.colored
+## pyutils_generic.colored
 
 ### cprint
 
@@ -248,7 +248,7 @@ Usage :
 """
 Sample Usage
 """
-from pyutils.printing import cprint
+from pyutils_generic.printing import cprint
 
 cprint("This is a blue message.").style(Palette.BLUE)
 cprint("Hello, World!").style(B=True)
@@ -257,7 +257,7 @@ cprint("This is a heading \n\n").style(B=True, U=True)
 
 - [Refer : docs :: colored](./docs/colored.md)
 
-## pyutils.typecheck
+## pyutils_generic.typecheck
 
 ### @strict
 
@@ -270,7 +270,7 @@ Drawbacks :
 Usage :
 
 ```python
-from pyutils.typecheck import strict
+from pyutils_generic.typecheck import strict
 
 
 @strict
@@ -305,8 +305,8 @@ Usage :
 
 # A basic example of sample usage
 
-from pyutils.printing import cprint
-from pyutils.typecheck import TypeCheck, strict
+from pyutils_generic.printing import cprint
+from pyutils_generic.typecheck import TypeCheck, strict
 import dataclasses
 
 @dataclasses.dataclass(frozen=True)
@@ -516,7 +516,7 @@ Usage :
 
 ```python
 
-from pyutils.typecheck import TypeCheck, strict, CoercedType
+from pyutils_generic.typecheck import TypeCheck, strict, CoercedType
 
 @dataclass(frozen=True)
 class Age(CoercedType):
@@ -569,7 +569,7 @@ Usage :
 # Example 1
 # =========
 import dataclasses
-from pyutils.typecheck import TypeCheck, registry, CustomType
+from pyutils_generic.typecheck import TypeCheck, registry, CustomType
 from typing import Any, List, Optional
 
 
@@ -646,7 +646,7 @@ annotated as `IntList` .
 # Example 2 : alternate way of Example 1
 # ======================================
 import dataclasses
-from pyutils.typecheck import TypeCheck, registry, CustomType
+from pyutils_generic.typecheck import TypeCheck, registry, CustomType
 from typing import Any, List, Optional
 
 # a custom type of our own
@@ -684,7 +684,7 @@ Usage :
 
 ```python
 import dataclasses
-from pyutils.typecheck import TypeCheck, registry, CustomType
+from pyutils_generic.typecheck import TypeCheck, registry, CustomType
 from typing import Any, List, Optional
 
 # a typeguard function for list of strings :
@@ -734,7 +734,7 @@ if __name__ == "__main__":
     
 ```
 
-## pyutils.schema
+## pyutils_generic.schema
 
 ### JsonDictValidator
 
@@ -751,7 +751,7 @@ Pros :
 Usage :
 
 ```python
-from pyutils.schema import JsonDictValidator
+from pyutils_generic.schema import JsonDictValidator
 
 
 # ===============
@@ -842,7 +842,7 @@ Executing Tests :
 ```shell
 python3 setup.py test
 
-# it will execute all the tests listed in `pyutils.tests/` folder 
+# it will execute all the tests listed in `pyutils_generic.tests/` folder 
 ```
 
 Creating a Build :
@@ -861,11 +861,11 @@ Coverage :
 
 ```bash
 # single test
-python3 -m coverage run -m unittest -v pyutils.tests.test_dict_validator
+python3 -m coverage run -m unittest -v pyutils_generic.tests.test_dict_validator
 ```
 ```bash
 # all tests
-python3 -m coverage run -m unittest discover -s pyutils/tests -p 'test_*.py'
+python3 -m coverage run -m unittest discover -s pyutils_generic/tests -p 'test_*.py'
 ```
 ```bash
 # coverage report
