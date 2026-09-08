@@ -6,7 +6,7 @@ except ImportError:
     # Python 3.x
     import builtins as b
 
-__version__ = '1.0.0'
+__version__ = '0.1.0'
 __author__ = 'Ankit Kumar'
 __package__ = __name__
 

@@ -1,0 +1,8 @@
+include README.md
+include LICENCE
+include CHANGELOG.md
+include pyproject.toml
+recursive-include pyutils_generic *.py py.typed
+recursive-exclude pyutils_generic/tests *
+global-exclude __pycache__
+global-exclude *.py[cod]

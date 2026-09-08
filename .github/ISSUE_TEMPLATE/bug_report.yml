@@ -1,0 +1,97 @@
+name: 🐛 Bug Report
+description: Report a problem with pyutils_generic
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report! 🙏
+
+        > ⚠️ **Security issues:** please do **not** report vulnerabilities here.
+        > Follow our [Security Policy](../blob/main/SECURITY.md) instead.
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I searched existing issues and this has not been reported yet.
+          required: true
+        - label: I am using a supported version of pyutils_generic.
+          required: true
+        - label: This is not a security vulnerability (those go through SECURITY.md).
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps (or a minimal script) to reproduce the behavior.
+      placeholder: |
+        1. Import '...'
+        2. Call '...'
+        3. See error
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include tracebacks if available.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: pkg-version
+    attributes:
+      label: pyutils_generic version
+      placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: e.g. 3.12.3
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: e.g. Ubuntu 24.04, macOS 14, Windows 11
+    validations:
+      required: false
+  - type: dropdown
+    id: module
+    attributes:
+      label: Affected module
+      options:
+        - pyutils_generic.colored
+        - pyutils_generic.immutables
+        - pyutils_generic.typecheck
+        - pyutils_generic.schema
+        - Other / not sure
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Anything else that might help us understand the problem.
+    validations:
+      required: false

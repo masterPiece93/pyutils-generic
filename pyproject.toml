@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyutils_generic"
+version = "0.1.0"
+authors = [
+    {name = "Ankit Kumar", email = "ankit8290@gmail.com"},
+]
+maintainers = [
+    {name = "Ankit Kumar", email = "ankit8290@gmail.com"},
+]
+description = "A small collection of practical, dependency-free Python utilities: ANSI terminal styling, immutable dict wrappers, runtime type checking and a lightweight JSON dict validator."
+readme = "README.md"
+license = {file = "LICENCE"}
+keywords = [
+    "pyutils",
+    "pyutils_generic",
+    "utilities",
+    "typecheck",
+    "schema",
+    "validator",
+    "colored",
+    "ansi",
+    "immutable",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+    "check-wheel-contents",
+    "pylint",
+    "coverage",
+]
+
+[project.urls]
+Homepage = "https://github.com/masterPiece93/pyutils-generic"
+Source = "https://github.com/masterPiece93/pyutils-generic"
+Issues = "https://github.com/masterPiece93/pyutils-generic/issues"
+Changelog = "https://github.com/masterPiece93/pyutils-generic/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pyutils_generic*"]
+exclude = ["pyutils_generic.tests*", "benchmarks*", "examples*", "docs*"]
+
+[tool.setuptools.package-data]
+pyutils_generic = ["py.typed"]

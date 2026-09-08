@@ -1,0 +1,168 @@
+name: tests
+
+# CI / Quality Automation
+# - lint:     pylint against pyutils_generic (fails under 9.0)
+# - test:     matrix of Python versions runs the unittest suite
+# - coverage: enforces a coverage threshold and publishes the coverage report
+# - coverage-badge: generates a self-contained SVG badge (no external service)
+#             and commits it to the `badges` branch on pushes to the default branch
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+  # Allow other workflows (e.g. release.yml) to require this one as a gate.
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (pylint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint pylint-actions
+          pip install -e .
+
+      - name: Analysing the code with pylint
+        run: pylint pyutils_generic --fail-under=9.0
+
+  test:
+    name: Test (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Show resolved versions
+        run: python --version
+
+      - name: Run test suite
+        run: python -m unittest discover -s pyutils_generic/tests -p 'test_*.py' -v
+
+  coverage:
+    name: Coverage gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install coverage
+
+      - name: Run tests with coverage
+        run: |
+          python -m coverage run -m unittest discover -s pyutils_generic/tests -p 'test_*.py'
+
+      - name: Generate XML report and enforce threshold
+        run: |
+          python -m coverage xml
+          python -m coverage report --fail-under=80
+
+      - name: Upload coverage artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+          if-no-files-found: ignore
+
+  coverage-badge:
+    name: Publish coverage badge
+    needs: coverage
+    runs-on: ubuntu-latest
+    # Self-contained coverage badge (no external service): generate an SVG and
+    # commit it to the `badges` branch. Only publishes on a direct push to the
+    # default branch — skipped on PRs and on release `workflow_call`s.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate coverage badge (SVG)
+        run: |
+          python -m pip install --upgrade pip
+          pip install "genbadge[coverage]"
+          genbadge coverage -i coverage.xml -o coverage.svg
+
+      - name: Publish badge to the `badges` branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cp coverage.svg "${RUNNER_TEMP}/coverage.svg"
+          cd "${RUNNER_TEMP}"
+          AUTH_REPO="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          if git clone --depth 1 --branch badges "${AUTH_REPO}" badges-repo 2>/dev/null; then
+            echo "Updating existing 'badges' branch."
+          else
+            echo "Creating new orphan 'badges' branch."
+            git clone --depth 1 "${AUTH_REPO}" badges-repo
+            cd badges-repo
+            git checkout --orphan badges
+            git rm -rf . >/dev/null 2>&1 || true
+            cd ..
+          fi
+          cp "${RUNNER_TEMP}/coverage.svg" badges-repo/coverage.svg
+          cd badges-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add coverage.svg
+          if git diff --staged --quiet; then
+            echo "Coverage badge unchanged; nothing to commit."
+          else
+            git commit -m "ci: update coverage badge [skip ci]"
+            git push origin badges
+          fi
