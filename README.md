@@ -848,24 +848,51 @@ if __name__ == '__main__':
 
 ## Local Development
 
+Setup :
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install -e ".[dev]"
+```
+
 Executing Tests :
 ```shell
-python3 setup.py test
+python -m unittest discover -s pyutils_generic/tests -p 'test_*.py' -v
 
-# it will execute all the tests listed in `pyutils_generic.tests/` folder 
+# it will execute all the tests listed in `pyutils_generic/tests` folder 
 ```
 
 Creating a Build :
-```shell
-python3 setup.py bdist_wheel
 
+> All packaging metadata now lives in `pyproject.toml` (PEP 517/621). `setup.py`
+> is kept only as a legacy shim (`setup()` with no args) — prefer `python -m build`
+> over `python setup.py bdist_wheel`.
+
+```shell
+pip install build
+python -m build
+
+# produces both an sdist (.tar.gz) and a wheel (.whl) under dist/
 ```
 
 Checking the correctness of a Build :
 ```shell
-check-wheel-contents <path-to-dist-folder>
+pip install check-wheel-contents twine
 
+check-wheel-contents dist/*.whl
+# -> dist/pyutils_generic-<version>-py3-none-any.whl: OK
+
+twine check dist/*
+# -> Checking dist/pyutils_generic-<version>-py3-none-any.whl: PASSED
+# -> Checking dist/pyutils_generic-<version>.tar.gz: PASSED
 ```
+
+> ✅ Verified: `python -m build` produces both wheel + sdist cleanly,
+> `check-wheel-contents` reports `OK`, and `twine check` reports `PASSED` for
+> both artifacts. The wheel includes the `py.typed` marker (PEP 561) and
+> correctly excludes the `pyutils_generic.tests` package (see
+> `[tool.setuptools.packages.find]` / `exclude` in `pyproject.toml`).
 
 Coverage :
 
