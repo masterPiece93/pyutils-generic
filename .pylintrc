@@ -1,0 +1,5 @@
+[FORMAT]
+max-line-length=120
+
+[MESSAGES CONTROL]
+disable=consider-using-from-import, redefined-outer-name, broad-exception-caught, import-outside-toplevel, missing-module-docstring, missing-function-docstring, missing-class-docstring, fixme, invalid-name, line-too-long, trailing-whitespace, missing-final-newline, trailing-newlines, too-few-public-methods, protected-access, wrong-import-order, unnecessary-lambda-assignment, no-else-raise, no-else-return, unidiomatic-typecheck, too-many-arguments, too-many-positional-arguments, too-many-locals, too-many-branches, attribute-defined-outside-init, use-a-generator, f-string-without-interpolation, arguments-renamed, arguments-differ, unnecessary-lambda, redefined-builtin, bad-mcs-classmethod-argument, consider-merging-isinstance, multiple-statements, bad-staticmethod-argument, unsupported-assignment-operation, unused-variable, unused-argument, no-self-argument, broad-exception-raised, no-member
