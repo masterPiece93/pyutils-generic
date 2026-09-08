@@ -227,6 +227,10 @@ from pyutils_generic.immutables import imdict
 d = imdict(a=2,b=[1,2])
 ```
 
+### ReadOnlyMeta
+
+This is a meta class , used to convert any class into `Read Only` .
+
 ## pyutils_generic.colored
 
 ### cprint
